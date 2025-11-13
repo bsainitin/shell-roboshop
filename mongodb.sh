@@ -15,7 +15,7 @@ echo "This script execution started at $(date)" | tee -a $LOG_FILE
 USERID=$(id -u)
 
 if [ $USERID -ne 0 ]; then
-    echo -e "${R}ERROR ${N}: Please run this command using root privilege"
+    echo -e "${R}ERROR ${N}: Please run this script as root or using sudo."
     exit 1
 fi
 
@@ -35,10 +35,16 @@ dnf install mongodb-org -y &>>$LOG_FILE
 VALIDATE $? "Installing MongoDB"
 
 systemctl enable mongod &>>$LOG_FILE
-VALIDATE $? "Enable MongoDB"
+VALIDATE $? "Enabled MongoDB"
 
 systemctl start mongod &>>$LOG_FILE
-VALIDATE $? "Start MongoDB"
+VALIDATE $? "Started MongoDB"
+
+sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf &>>$LOG_FILE
+VALIDATE $? "Allowing remote connections to MongoDB"
+
+systemctl restart mongod &>>$LOG_FILE
+VALIDATE $? "Restarted MongoDB"
 
 
 
