@@ -6,7 +6,7 @@ Y="\e[33m"
 N="\e[0m"
 
 LOG_FOLDER="/var/log/shell-roboshop"
-SCRIPT_NAME=$( basename $0 )
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOG_FILE="$LOG_FOLDER/$SCRIPT_NAME.log"
 SCRIPT_DIR=$PWD
 START_TIME=$(date +%s)
@@ -27,6 +27,14 @@ VALIDATE(){
         echo -e "${2} ... ${G} SUCCESS ${N}" | tee -a $LOG_FILE
     fi
 }
+
+###############  NODEJS  ################
+dnf module disable nodejs -y &>>$LOG_FILE
+VALIDATE $? "Disabling NodeJS modules"
+dnf module enable nodejs:20 -y &>>$LOG_FILE
+VALIDATE $? "Enabling NodeJS version 20"
+dnf install nodejs -y &>>$LOG_FILE
+VALIDATE $? "Installing NodeJS"
 
 id roboshop &>> $LOG_FILE
 if [ $? -ne 0 ]; then 
